@@ -1,12 +1,16 @@
+import time
+
 import Socket
 
 b = Socket.MySocket()
 
 b.connect("vlbelintrocrypto.hevs.ch", 6000)
-msg = "hello"
+msg = "bonjour monsieur !a"
+time.sleep(5)
 lgth = b.send(msg,"t")
 
-b.receive(lgth)
+msg = b.receive(lgth)
+print("received "+msg)
 
 
 

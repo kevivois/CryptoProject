@@ -18,17 +18,25 @@ class MySocket:
         print("is connected")
 
     def send(self, msg, messageType):
-        cnt=0
-        payload = bytes("ISC",'utf-8') + bytes(messageType,'utf-8')
-        cnt+=4
-        payload+=len(msg).to_bytes(2,byteorder='big')
-        cnt+=2
+        payload = bytes("ISC", 'utf-8') + bytes(messageType, 'utf-8')
+        payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
-            payload += bytes(str(p).zfill(4),'utf-8')
-            cnt+=4
+            payload += bytes(str(p).zfill(4), 'utf-8')
         self.sock.send(payload)
-        return cnt
-    def receive(self, size):
-        while True:
-            message = str(self.sock.recv(size))
-            print("received :" + message)
+        return len(payload)
+
+    def receive(self, size) -> str:
+        data = self.sock.recv(size)
+        header = data[0:3].decode("utf-8")
+        if header == "ISC":
+            mode = data[3:4].decode("utf-8")
+            lgth = int.from_bytes(data[4:6],"big")
+            content = data[6:len(data)].decode("utf-8")
+            message = ""
+            cn=0
+            for c in content.split("000"):
+                cn += 1
+                if cn <= lgth:
+                    message+=c
+            return message
+        return ""
