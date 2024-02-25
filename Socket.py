@@ -21,6 +21,7 @@ class MySocket:
         payload = bytes("ISC", 'utf-8') + bytes(messageType, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
+
             payload += bytes(str(p).zfill(4), 'utf-8')
         self.sock.send(payload)
         return len(payload)
@@ -28,6 +29,7 @@ class MySocket:
     def receive(self, size) -> str:
         data = self.sock.recv(size)
         header = data[0:3].decode("utf-8")
+        print("data:"+data.decode("utf-8") + " header :" + header)
         if header == "ISC":
             mode = data[3:4].decode("utf-8")
             lgth = int.from_bytes(data[4:6],"big")
@@ -35,8 +37,8 @@ class MySocket:
             message = ""
             cn=0
             for c in content.split("000"):
-                cn += 1
                 if cn <= lgth:
                     message+=c
+                cn += 1
             return message
         return ""
