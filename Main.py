@@ -6,8 +6,8 @@ import Socket
 b = Socket.MySocket()
 
 b.connect("vlbelintrocrypto.hevs.ch", 6000)
-lgth = b.send("quoicoubeh !", 't')
+lgth = b.send("quoicoõubeh !", 't')
 
 while True:
-    msg = b.receive
+    msg = b.receive()
     print("received " + msg)
