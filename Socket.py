@@ -25,23 +25,27 @@ class MySocket:
     def send_vigenere(self, msg: str, message_type: str, key: str):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
-        vigenered_message = ""
+        coded_msg = ""
         for p in range(len(msg)):
-            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") + ord(key[p % len(key)])).to_bytes(4, "big")
-            vigenered_message += chr(int.from_bytes(bytes(msg[p], "utf-8"), "big") + ord(key[p % len(key)]))
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
+            single_value = (ord(msg[p]) + ord(key[p % len(key)]))
+            bytes_value = single_value.to_bytes(4, "big")
+            coded_msg += chr(single_value % 1114112)
+            lgth = 4 - len(bytes_value)
+            payload += b'\x00' * lgth + bytes_value
         self.sock.send(payload)
-        print("vigenered message :" + vigenered_message)
-        return len(payload)
+        return coded_msg
 
-    def decode_vigenere(self, msg: str, message_type: str, key: str):
-        message = ""
-        for p in range(len(msg)):
-            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") - ord(key[p % len(key)])).to_bytes(4, "big")
-            decoded_char = chr(int.from_bytes(bytes(msg[p], "utf-8"), "big") - ord(key[p % len(key)]))
-            message += decoded_char
-        return message
+    def decode_vigenere(self, coded_msg: str, key: str) -> str:
+        decoded_msg = ""
+        for i in range(len(coded_msg)):
+            single_value = (ord(coded_msg[i]) - ord(key[i % len(key)])) % 1114112
+            decoded_char = chr(single_value)
+            decoded_msg += decoded_char
+        return decoded_msg
+
+    """
+    Essai non concluant mdr
+    """
 
     def vigenere_analysis(self, seq: str, key_length: int):
         data = defaultdict(list)
@@ -53,12 +57,17 @@ class MySocket:
         for key, value in data.items():
             letter_counts = Counter(value)
             most_frequent_letter = max(letter_counts, key=letter_counts.get)
-            shift = ord('E') - ord(most_frequent_letter)
+            shift_start = ord('E')
+            if str(most_frequent_letter).islower():
+                shift_start = ord('e')
+
+            shift = (shift_start - ord(most_frequent_letter)) % 26
 
             for idx, c in enumerate(value):
-                value[idx] = chr((ord(c) + shift) % 128)
+                value[idx] = self.shift_max(c, shift)
+
         doing = True
-        idx=0
+        idx = 0
         while doing:
             if data[idx]:
                 message += data[idx].pop(0)
@@ -66,9 +75,24 @@ class MySocket:
                 if idx > key_length - 1:
                     idx = 0
             else:
-                doing=False
-
+                doing = False
         return message
+
+    def shift_max(self, c: str, cnt: int) -> str:
+        if c.isupper():
+            mnV = ord('A')
+            mxV = ord('Z')
+            v = ord(c) + cnt
+            result = chr((v - mnV) % 26 + mnV)
+            return result
+        elif c.islower():
+            mnV = ord('a')
+            mxV = ord('z')
+            v = ord(c) + cnt
+            result = chr((v - mnV) % 26 + mnV)
+            return result
+        else:
+            return c
 
     def send_shift(self, msg: str, message_type: str, amount: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
@@ -82,9 +106,6 @@ class MySocket:
         print("shifted message :" + shifted_message)
         self.sock.send(payload)
         return len(payload)
-
-    def frequenceAnalysisShift(msg: str):
-        foo = 0
 
     def send_xor(self, msg: str, message_type: str, amount: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
