@@ -21,6 +21,56 @@ class MySocket:
             payload += b'\x00' * lgth + bytes(p, 'utf-8')
         self.sock.send(payload)
         return len(payload)
+    
+
+    def prime(n : int):
+        for i in range(2, n) :
+            if(n % i == 0):
+                return False
+        return False
+
+    def coprime(a : int, b : int):
+        if(a <b) :
+            for i in range(2, a) :
+                if(a %i == 0 and b%i == 0):
+                    return False
+        return True
+    
+    def key_generate(self, p : int, q : int, e : int):
+        if prime(p) and prime(q): 
+            n = q*p
+            k = (p-1)*(q-1)
+            if e < k and coprime(e, k):
+                d = e
+                #still TODO
+                return [n, e, d]
+        else:
+            return "your key is incorrect"
+
+
+
+
+    def send_RSA(self, msg : str, message_type: str, n : int, e : int ):
+        payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
+        payload += len(msg).to_bytes(2, byteorder='big')
+        encoded_msg = ""
+        for p in msg:
+            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(e))% int(n)
+            v = val.to_bytes(4, "big")
+            encoded_msg += v.decode("utf-8", 'replace')
+            lgth = 4 - len(v)
+            payload += b'\x00' * lgth + v
+        self.sock.send(payload)
+        return len(payload)
+
+    def decode_RSA(self, msg : str, n : int, d : int):
+        decoded_msg = ""
+        for p in range(len(msg)):
+            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") ).to_bytes(4, "big")
+            vigenered_message += chr(int.from_bytes(bytes(msg[p], "utf-8"), "big"))
+            lgth = 4 - len(v)
+            payload += b'\x00' * lgth + v
+        return decoded_msg
 
     def send_vigenere(self, msg: str, message_type: str, key: str):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
