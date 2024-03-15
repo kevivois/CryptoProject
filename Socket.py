@@ -25,15 +25,14 @@ class MySocket:
     def send_vigenere(self, msg: str, message_type: str, key: str):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
-        coded_msg = ""
+        vigenered_message = ""
         for p in range(len(msg)):
-            single_value = (ord(msg[p]) + ord(key[p % len(key)]))
-            bytes_value = single_value.to_bytes(4, "big")
-            coded_msg += chr(single_value % 1114112)
-            lgth = 4 - len(bytes_value)
-            payload += b'\x00' * lgth + bytes_value
+            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") + ord(key[p % len(key)])).to_bytes(4, "big")
+            vigenered_message += chr(int.from_bytes(bytes(msg[p], "utf-8"), "big") + ord(key[p % len(key)]))
+            lgth = 4 - len(v)
+            payload += b'\x00' * lgth + v
         self.sock.send(payload)
-        return coded_msg
+        return vigenered_message
 
     def decode_vigenere(self, coded_msg: str, key: str) -> str:
         decoded_msg = ""
