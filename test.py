@@ -19,7 +19,11 @@ def task_method(b, cmd, messageType):
         key = int(key) 
         b.sendshift(msg_to_encode, messageType, key)
     elif code == "vigenere" : 
-        b.sendvigenere(msg_to_encode, messageType, key)
+        b.send_vigenere(msg_to_encode, messageType, key)
+    elif code == "RSA" : 
+        n = msg.split("=")[1].split(",")[0]
+        e = msg.split("=")[-1]
+        b.send_RSA(msg_to_encode, messageType, n, e)
     else :
         key = int(key)
         b.sendxor(msg_to_encode, messageType, key)
