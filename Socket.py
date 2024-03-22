@@ -58,31 +58,30 @@ class MySocket:
 
 
 
-    def send_RSA(self, msg : str, message_type: str, n : int, e : int ):
+    def send_RSA(self, msg, message_type: str, n : int, e : int ):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
-        encoded_msg = ""
+        encoded_msg = []
         for p in msg:
-            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(e))% int(n)
+            val = pow(p, int(e))% int(n)
             v = val.to_bytes(4, "big")
-            encoded_msg += v.decode("utf-8", 'replace')
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
+            encoded_msg.append(val)
+            print(encoded_msg)
+            payload += v
         self.sock.send(payload)
-        return len(payload)
+        return encoded_msg
     
     def send_better_RSA(self, msg : str, message_type: str, n : int, e : int ):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
-        encoded_msg = ""
+        encoded_msg = []
         for p in msg:
-            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(e))% int(n)
+            val = pow(p, int(e))% int(n)
             v = val.to_bytes(4, "big")
-            encoded_msg += v.decode("utf-8", 'replace')
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
+            encoded_msg.append(val)
+            payload += v
         self.sock.send(payload)
-        return len(payload)
+        return encoded_msg
 
     def decode_RSA(self, msg : str, n : int, d : int):
         pass

@@ -16,5 +16,4 @@ def int_to_str(int_value) -> str:
 
 
 def str_to_intarray(s: str):
-    print(s)
     return [ord(c) for c in s]

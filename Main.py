@@ -9,10 +9,10 @@ def get_user_input(prompt):
 
 
 def encode_message(b, cmd, messageType):
-    possibilities = ["shift", "xor", "vigenere"]
+    possibilities = ["shift", "xor", "vigenere",'RSA']
     idxChoice = -1
     for idx, v in enumerate(possibilities):
-        if v in cmd.split(" ")[1]:
+        if str(v).lower() in cmd.split(" ")[1].lower():
             idxChoice = idx
 
     type_encoding = idxChoice + 1
@@ -21,6 +21,7 @@ def encode_message(b, cmd, messageType):
 
     msg_byte = b.receive('s')
     msg = conversion.intarray_to_str(msg_byte)
+    print(msg)
     encode_data = msg.split(" ")[-1]
     msg_to_encode = b.receive(messageType)
 
@@ -32,6 +33,11 @@ def encode_message(b, cmd, messageType):
         coded_message = b.send_vigenere(msg_to_encode, messageType, encode_data)
         decoded_message = conversion.intarray_to_str(b.decode_vigenere(coded_message,encode_data))
         print("decoded message:" + decoded_message)
+    elif type_encoding == 4:
+        n = msg.split("=")[1].split(",")[0]
+        e = msg.split("=")[-1]
+        coded_message = b.send_RSA(msg_to_encode, messageType, n, e)
+        print(conversion.intarray_to_str(coded_message))
 
     response = conversion.intarray_to_str(b.receive(messageType))
     print(response,'r')
