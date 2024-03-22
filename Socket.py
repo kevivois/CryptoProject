@@ -1,6 +1,6 @@
 import socket
 from collections import defaultdict, Counter
-
+from math import sqrt
 
 class MySocket:
 
@@ -24,10 +24,10 @@ class MySocket:
     
     @staticmethod
     def prime(n : int):
-        for i in range(2, n) :
+        for i in range(2, int(sqrt(n))+1) :
             if(n % i == 0):
                 return False
-        return False
+        return True
 
     @staticmethod
     def coprime(a : int, b : int):
@@ -41,14 +41,17 @@ class MySocket:
         if self.prime(p) and self.prime(q): 
             n = q*p
             k = (p-1)*(q-1)
+            
             if e < k and self.coprime(e, k):
-                d = e
-                #still TODO
+                d = 0
+                b = 1
+                res = 0
+                while res != 1 :
+                    res = d * e + b * k
+                    b += 1
                 return [n, e, d]
         else:
-            return "your key is incorrect"
-
-
+            return False
 
 
     def send_RSA(self, msg : str, message_type: str, n : int, e : int ):
@@ -61,6 +64,7 @@ class MySocket:
             encoded_msg += v.decode("utf-8", 'replace')
             lgth = 4 - len(v)
             payload += b'\x00' * lgth + v
+            print(encoded_msg)
         self.sock.send(payload)
         return len(payload)
     
@@ -68,22 +72,27 @@ class MySocket:
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         encoded_msg = ""
+        valeur = 1
         for p in msg:
-            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(e))% int(n)
-            v = val.to_bytes(4, "big")
+            val = int(e) % int(n)
+            valeur *= (int.from_bytes(bytes(p, "utf-8"), "big"))
+            valeur %= int(n)
+            v = valeur.to_bytes(4, "big")
             encoded_msg += v.decode("utf-8", 'replace')
             lgth = 4 - len(v)
             payload += b'\x00' * lgth + v
+            print(encoded_msg)
         self.sock.send(payload)
         return len(payload)
 
     def decode_RSA(self, msg : str, n : int, d : int):
         decoded_msg = ""
-        for p in range(len(msg)):
-            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") ).to_bytes(4, "big")
-            vigenered_message += chr(int.from_bytes(bytes(msg[p], "utf-8"), "big"))
+        for p in msg:
+            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(d))% int(n)
+            v = val.to_bytes(4, "big")
             lgth = 4 - len(v)
             payload += b'\x00' * lgth + v
+        self.sock.send(payload)
         return decoded_msg
 
     def send_vigenere(self, msg: str, message_type: str, key: str):

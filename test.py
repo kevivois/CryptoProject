@@ -23,10 +23,13 @@ def task_method(b, cmd, messageType):
     elif code == "RSA" : 
         n = msg.split("=")[1].split(",")[0]
         e = msg.split("=")[-1]
-        b.send_RSA(msg_to_encode, messageType, n, e)
+        b.send_better_RSA(msg_to_encode, messageType, n, e)
+        
     else :
         key = int(key)
         b.sendxor(msg_to_encode, messageType, key)
+    print("> " + b.receive(messageType))
+    b.send_RSA(msg_to_encode, messageType, n, e)
     print("> " + b.receive(messageType))
         
 
@@ -49,6 +52,7 @@ def main():
                 b.send(cmd, message_type)
                 response = b.receive(message_type)
                 print("<" + response)
+
 
 
 if __name__ == "__main__":
