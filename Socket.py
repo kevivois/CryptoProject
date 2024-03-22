@@ -22,13 +22,14 @@ class MySocket:
         self.sock.send(payload)
         return len(payload)
     
-
+    @staticmethod
     def prime(n : int):
         for i in range(2, n) :
             if(n % i == 0):
                 return False
         return False
 
+    @staticmethod
     def coprime(a : int, b : int):
         if(a <b) :
             for i in range(2, a) :
@@ -37,10 +38,10 @@ class MySocket:
         return True
     
     def key_generate(self, p : int, q : int, e : int):
-        if prime(p) and prime(q): 
+        if self.prime(p) and self.prime(q): 
             n = q*p
             k = (p-1)*(q-1)
-            if e < k and coprime(e, k):
+            if e < k and self.coprime(e, k):
                 d = e
                 #still TODO
                 return [n, e, d]
@@ -51,6 +52,19 @@ class MySocket:
 
 
     def send_RSA(self, msg : str, message_type: str, n : int, e : int ):
+        payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
+        payload += len(msg).to_bytes(2, byteorder='big')
+        encoded_msg = ""
+        for p in msg:
+            val = pow(int.from_bytes(bytes(p, "utf-8"), "big"), int(e))% int(n)
+            v = val.to_bytes(4, "big")
+            encoded_msg += v.decode("utf-8", 'replace')
+            lgth = 4 - len(v)
+            payload += b'\x00' * lgth + v
+        self.sock.send(payload)
+        return len(payload)
+    
+    def send_better_RSA(self, msg : str, message_type: str, n : int, e : int ):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         encoded_msg = ""
@@ -183,3 +197,4 @@ class MySocket:
             message = "".join(c for c in content if c != '\x00')
             return message
         return ""
+    
