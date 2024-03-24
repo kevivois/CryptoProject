@@ -64,7 +64,7 @@ class MySocket:
 
 
 
-    def send_RSA(self, msg : str, message_type: str, n : int, e : int ):
+    def send_RSA(self, msg, message_type: str, n : int, e : int ):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         encoded_msg = []
@@ -73,37 +73,30 @@ class MySocket:
             v = val.to_bytes(4, "big")
             encoded_msg.append(val)
             payload += v
-            encoded_msg += v.decode("utf-8", 'replace')
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
-            print(encoded_msg)
         self.sock.send(payload)
         return encoded_msg
     
-    def send_better_RSA(self, msg : str, message_type: str, n : int, e : int ):
+    def send_better_RSA(self, msg, message_type: str, n : int, e : int ):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
-        encoded_msg = ""
+        msg_array = []
         for p in msg:
-            val = int(e) % int(n)
-            valeur *= (int.from_bytes(bytes(p, "utf-8"), "big"))
+            valeur = int(e) % int(n)
+            valeur *= p
             valeur %= int(n)
             v = valeur.to_bytes(4, "big")
-            encoded_msg += v.decode("utf-8", 'replace')
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
-            print(encoded_msg)
+            msg_array.append(valeur)
+            payload += v
+            print(msg_array)
         self.sock.send(payload)
-        return encoded_msg
+        return msg_array
 
-    def decode_RSA(self, msg : str, n : int, d : int):
-        decoded_msg = ""
-        for p in range(len(msg)):
-            v = (int.from_bytes(bytes(msg[p], "utf-8"), "big") ).to_bytes(4, "big")
-            vigenered_message += chr(int.from_bytes(bytes(msg[p], "utf-8"), "big"))
-            lgth = 4 - len(v)
-            payload += b'\x00' * lgth + v
-        return decoded_msg
+    def decode_RSA(self, msg, n : int, d : int):
+        decoded_array = []
+        for idx,value in enumerate(msg):
+            # TODO
+            pass
+        return decoded_array
 
     def send_vigenere(self, msg, message_type: str, key: str):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
