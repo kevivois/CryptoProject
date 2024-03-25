@@ -11,6 +11,7 @@ import conversion
 
 from math import sqrt
 
+
 class MySocket:
 
     def __init__(self, sock=None):
@@ -26,74 +27,77 @@ class MySocket:
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
-            payload += p.to_bytes(4,'big')
+            payload += p.to_bytes(4, 'big')
         self.sock.send(payload)
         return len(payload)
-    
+
     @staticmethod
-    def prime(n : int):
-        for i in range(2, int(sqrt(n))+1) :
-            if(n % i == 0):
+    def prime(n: int):
+        for i in range(2, int(sqrt(n)) + 1):
+            if (n % i == 0):
                 return False
         return True
 
     @staticmethod
-    def coprime(a : int, b : int):
-        if(a <b) :
-            for i in range(2, a) :
-                if(a %i == 0 and b%i == 0):
+    def coprime(a: int, b: int):
+        if (a < b):
+            for i in range(2, a):
+                if (a % i == 0 and b % i == 0):
                     return False
         return True
-    
-    def key_generate(self, p : int, q : int, e : int):
-        if self.prime(p) and self.prime(q): 
-            n = q*p
-            k = (p-1)*(q-1)
-            
+
+    def key_generate(self, p: int, q: int, e: int):
+        if self.prime(p) and self.prime(q):
+            n = q * p
+            k = (p - 1) * (q - 1)
+
             if e < k and self.coprime(e, k):
                 d = 0
                 b = 1
                 res = 0
-                while res != 1 :
+                while res != 1:
                     res = d * e + b * k
                     b += 1
                 return [n, e, d]
         else:
             return False
 
-
-
-
-    def send_RSA(self, msg, message_type: str, n : int, e : int ):
+    def send_RSA(self, msg, message_type: str, n: int, e: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         encoded_msg = []
         for p in msg:
-            val = pow(p, int(e))% int(n)
+            val = pow(p, int(e)) % int(n)
             v = val.to_bytes(4, "big")
             encoded_msg.append(val)
             payload += v
         self.sock.send(payload)
         return encoded_msg
-    
-    def send_better_RSA(self, msg, message_type: str, n : int, e : int ):
+
+    def modular_pow(self, b, e, m):
+        r = 1
+        if 1 & e:
+            r = b
+        while e:
+            e >>= 1
+            b = (b * b) % m
+            if e & 1: r = (r * b) % m
+        return r
+
+    def send_better_RSA(self, msg, message_type: str, n: int, e: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         msg_array = []
         for p in msg:
-            valeur = int(e) % int(n)
-            valeur *= p
-            valeur %= int(n)
-            v = valeur.to_bytes(4, "big")
+            valeur = self.modular_pow(p, e, n)
             msg_array.append(valeur)
-            payload += v
-            print(msg_array)
+            payload += valeur.to_bytes(4, "big")
         self.sock.send(payload)
         return msg_array
 
-    def decode_RSA(self, msg, n : int, d : int):
+    def decode_RSA(self, msg, n: int, d: int):
         decoded_array = []
-        for idx,value in enumerate(msg):
+        for idx, value in enumerate(msg):
             # TODO
             pass
         return decoded_array
@@ -104,7 +108,7 @@ class MySocket:
         arr = []
         for idx, int_value in enumerate(msg):
             normal_value = int_value + ord(key[idx % len(key)])
-            payload += normal_value.to_bytes(4,'big')
+            payload += normal_value.to_bytes(4, 'big')
             arr.append(normal_value)
         print(payload)
         self.sock.send(payload)
@@ -149,9 +153,9 @@ class MySocket:
             mode = data[3:4].decode("utf-8")
             lgth = int.from_bytes(data[4:6], "big")
             content = data[6:]
-            for i in range(0,len(content),4):
+            for i in range(0, len(content), 4):
                 try:
-                    arr.append(int.from_bytes(content[i:i+4]))
+                    arr.append(int.from_bytes(content[i:i + 4]))
                 except:
                     pass
             return arr

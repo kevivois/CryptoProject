@@ -36,7 +36,8 @@ def encode_message(b, cmd, messageType):
     elif type_encoding == 4:
         n = msg.split("=")[1].split(",")[0]
         e = msg.split("=")[-1]
-        coded_message = b.send_RSA(msg_to_encode, messageType, n, e)
+        print(n,e,"aaa")
+        coded_message = b.send_better_RSA(msg_to_encode, messageType, int(n),int(e))
         print(conversion.intarray_to_str(coded_message))
 
     response = conversion.intarray_to_str(b.receive(messageType))
