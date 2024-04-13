@@ -27,12 +27,45 @@ class MySocket:
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
-            payload += p.to_bytes(4, 'big')
-        self.sock.send(payload)
+            payload += msg.to_bytes(4, 'big')
+            self.sock.send(payload)
         return len(payload)
+    
+    @staticmethod
+    def random(x) :
+        a = 1664525
+        b = 1013904223
+        n = pow(2, 32)
+        rand = (x*a + b)%n
+        return rand
+
+    def randomPrime():
+        n = 0
+    
+    def keyGenerate(self, n : int, ):
+        m = n-1
+        for x in m :
+            if self.prime(n) :
+                g = n/x
+        return g
+
+    
+    def diffieHellman(self, msg, message_type: str, a : int, key2 : int, p : int, g : int):
+        payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
+        payload += len(msg).to_bytes(2, byteorder='big')
+        key = pow(key2)
+        encoded_msg = []
+        for p in msg:
+            val = p*key
+            v = val.to_bytes(4, "big")
+            encoded_msg.append(val)
+            payload += v
+
 
     @staticmethod
-    def prime(n: int):
+    def prime( n: int):
+        if n <= 1 :
+            return False
         for i in range(2, int(sqrt(n)) + 1):
             if (n % i == 0):
                 return False

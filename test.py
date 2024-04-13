@@ -24,7 +24,8 @@ def task_method(b, cmd, messageType):
         n = msg.split("=")[1].split(",")[0]
         e = msg.split("=")[-1]
         b.send_better_RSA(msg_to_encode, messageType, n, e)
-        
+    elif code == "diffiehellman" :
+        valeur =0    
     else :
         key = int(key)
         b.sendxor(msg_to_encode, messageType, key)
