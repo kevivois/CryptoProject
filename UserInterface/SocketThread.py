@@ -18,8 +18,7 @@ class SocketThread(threading.Thread):
         print("Socket Thread Started")
         self.socket.connect(self.address, self.port)
         while self.working:
-            message = self.socket.receive_all()
-            print(message,"message")
+            message = self.socket.receive('t')
             if message:
                 self.received_message_callback(message)
 

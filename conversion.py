@@ -6,13 +6,12 @@ def intarray_to_str(arr) -> str:
     for idx, int_value in enumerate(arr):
         try:
             msg += int_to_str(int_value)
-        except Exception as e:
-            print(e)
+        except:
+            pass
     return msg
 
 
 def int_to_str(int_value) -> str:
-    print(int_value,"int_value")
     return int_value.to_bytes(math.ceil(int_value.bit_length() / 8), 'big').decode('utf-8')
 
 

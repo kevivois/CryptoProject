@@ -18,7 +18,6 @@ class MySocket:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__sending = False
-        # self.payloadSender = PayloadSender(self)
         self.host = None
         self.port = None
         self.__available = False
@@ -34,7 +33,7 @@ class MySocket:
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
-            payload += msg.to_bytes(4, 'big')
+            payload += p.to_bytes(4, "big")
         self.send_payload(payload)
         return len(payload)
 
@@ -198,13 +197,21 @@ class MySocket:
         self.send_payload(payload)
         return len(payload)
 
-    def receive(self, typeToWait='t'):
+
+    def receive(self,typeToWait='t'):
+        try:
+            return self.__receive(typeToWait)
+        except Exception as e:
+            print("error while receiving : ",e)
+        return None
+
+    def __receive(self, typeToWait='t'):
         waiting = True
         arr = []
         data = None
         while waiting:
             try:
-                data = self.sock.recv(2048)
+                data = self.sock.recv(6)
             except:
                 self.__available = False
                 self.reconnect()
@@ -212,38 +219,18 @@ class MySocket:
             header = data[0:3].decode("utf-8")
             if header == "ISC" and data[3:4].decode("utf-8") == typeToWait:
                 waiting = False
-
         header = data[0:3].decode("utf-8")
         if header == "ISC":
             mode = data[3:4].decode("utf-8")
             lgth = int.from_bytes(data[4:6], "big")
-            content = data[6:]
-            for i in range(0, len(content), 4):
+            content = self.sock.recv(lgth*4)
+            for i in range(0, lgth*4, 4):
                 try:
-                    arr.append(int.from_bytes(content[i:i + 4]))
-                except:
-                    pass
+                    arr.append(int.from_bytes(content[i:i + 4],"big"))
+                except Exception as e:
+                    print(e)
             return arr
         return []
 
-    def receive_all(self):
-        arr = []
-        try:
-            data = self.sock.recv(2048)
-        except:
-            self.reconnect()
-            return []
-        header = data[0:3].decode("utf-8")
-        if header == "ISC":
-            mode = data[3:4].decode("utf-8")
-            lgth = int.from_bytes(data[4:6], "big")
-            content = data[6:]
-            for i in range(0, len(content), 4):
-                try:
-                    arr.append(int.from_bytes(content[i:i + 4]))
-                except:
-                    pass
-            return arr
-        return []
 
 

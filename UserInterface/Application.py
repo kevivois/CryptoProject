@@ -9,6 +9,7 @@ from Mainwindow import UI
 
 from SocketThread import SocketThread
 
+
 class Application(QApplication):
     def __init__(self, argv: List[str]):
         super().__init__(argv)
@@ -17,14 +18,12 @@ class Application(QApplication):
         self.applicationTimer.timeout.connect(self.applicationTimer_callback)
         self.applicationTimer.start(100)
         self.socket = SocketThread("vlbelintrocrypto.hevs.ch", 6000)
-        self.mainWindow = UI("gui.ui", self.socket)
+        self.mainWindow = UI("gui2.ui", self.socket)
         self.socket.start()
         self.mainWindow.show()
 
-
     def applicationTimer_callback(self):
         pass
-
     def handle_error(self, cls, exception, traceback):
         sys.__excepthook__(cls, exception, traceback)
 
