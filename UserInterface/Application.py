@@ -16,7 +16,7 @@ class Application(QApplication):
         self.applicationTimer = QTimer()
         self.applicationTimer.timeout.connect(self.applicationTimer_callback)
         self.applicationTimer.start(100)
-        self.mainWindow = UI()
+        self.mainWindow = UI("gui.ui")
         self.mainWindow.show()
 
     def applicationTimer_callback(self):
