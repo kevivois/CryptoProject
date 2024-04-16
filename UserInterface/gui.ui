@@ -30,6 +30,16 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
+         <widget class="QLabel" name="label_message">
+          <property name="text">
+           <string>Message:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_message"/>
+        </item>
+        <item>
          <widget class="QLabel" name="label_encrypt">
           <property name="text">
            <string><html><head/><body><p><span style=" font-size:12pt; font-weight:600; color:#007bff;">Encrypt :</span></p></body></html></string>
@@ -57,6 +67,9 @@
            <property name="text">
             <string>Diffie-Hellman</string>
            </property>
+           <property name="text">
+            <string>none</string>
+           </property>
           </item>
          </widget>
         </item>
@@ -69,6 +82,27 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEdit_encryptKey"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_messageType">
+          <property name="text">
+           <string>Message Type:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox_messageType">
+          <item>
+           <property name="text">
+            <string>public</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>private</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_send">
@@ -107,6 +141,9 @@
           <item>
            <property name="text">
             <string>RSA</string>
+           </property>
+           <property name="text">
+            <string>Diffie-Hellman</string>
            </property>
           </item>
           <item>

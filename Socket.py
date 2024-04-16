@@ -12,24 +12,51 @@ import conversion
 from math import sqrt
 
 
+
 class MySocket:
 
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
+    def __init__(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__sending = False
+        # self.payloadSender = PayloadSender(self)
+        self.host = None
+        self.port = None
+        self.__available = False
+
 
     def connect(self, host, port):
+        self.host = host
+        self.port = port
         self.sock.connect((host, port))
+        self.__available = True
 
     def send(self, msg, message_type):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
             payload += msg.to_bytes(4, 'big')
-            self.sock.send(payload)
+        self.send_payload(payload)
         return len(payload)
+
+    def send_payload(self,payload):
+        try:
+            self.sock.sendall(payload)
+        except socket.error as e:
+            print(e)
+            self.reconnect()
+        except Exception as e:
+            print(e)
+
+
+    def reconnect(self):
+        self.__sending = False
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect(self.host,self.port)
+
+
+    def isSending(self):
+        return self.__sending
     
     @staticmethod
     def random(x) :
@@ -39,7 +66,7 @@ class MySocket:
         rand = (x*a + b)%n
         return rand
 
-    def randomPrime():
+    def randomPrime(self):
         n = 0
     
     def keyGenerate(self, n : int, ):
@@ -104,7 +131,7 @@ class MySocket:
             v = val.to_bytes(4, "big")
             encoded_msg.append(val)
             payload += v
-        self.sock.send(payload)
+        self.send_payload(payload)
         return encoded_msg
 
     def modular_pow(self, b, e, m):
@@ -125,7 +152,7 @@ class MySocket:
             valeur = self.modular_pow(p, e, n)
             msg_array.append(valeur)
             payload += valeur.to_bytes(4, "big")
-        self.sock.send(payload)
+        self.send_payload(payload)
         return msg_array
 
     def decode_RSA(self, msg, n: int, d: int):
@@ -143,9 +170,9 @@ class MySocket:
             normal_value = int_value + ord(key[idx % len(key)])
             payload += normal_value.to_bytes(4, 'big')
             arr.append(normal_value)
-        print(payload)
-        self.sock.send(payload)
-        return arr
+
+        self.send_payload(payload)
+        return len(payload)
 
     def decode_vigenere(self, coded_msg, key: str):
         arr = []
@@ -159,7 +186,7 @@ class MySocket:
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
             payload += (p + amount).to_bytes(4, "big")
-        self.sock.send(payload)
+        self.send_payload(payload)
         return len(payload)
 
     def send_xor(self, msg, message_type: str, amount: int):
@@ -168,7 +195,7 @@ class MySocket:
         for p in msg:
             v = (p ^ amount).to_bytes(4)
             payload += v
-        self.sock.send(payload)
+        self.send_payload(payload)
         return len(payload)
 
     def receive(self, typeToWait='t'):
@@ -176,7 +203,12 @@ class MySocket:
         arr = []
         data = None
         while waiting:
-            data = self.sock.recv(2048)
+            try:
+                data = self.sock.recv(2048)
+            except:
+                self.__available = False
+                self.reconnect()
+                return []
             header = data[0:3].decode("utf-8")
             if header == "ISC" and data[3:4].decode("utf-8") == typeToWait:
                 waiting = False
@@ -193,3 +225,25 @@ class MySocket:
                     pass
             return arr
         return []
+
+    def receive_all(self):
+        arr = []
+        try:
+            data = self.sock.recv(2048)
+        except:
+            self.reconnect()
+            return []
+        header = data[0:3].decode("utf-8")
+        if header == "ISC":
+            mode = data[3:4].decode("utf-8")
+            lgth = int.from_bytes(data[4:6], "big")
+            content = data[6:]
+            for i in range(0, len(content), 4):
+                try:
+                    arr.append(int.from_bytes(content[i:i + 4]))
+                except:
+                    pass
+            return arr
+        return []
+
+
