@@ -6,173 +6,267 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1087</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Chat sécurisé</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="maximumSize">
+    <size>
+     <width>1087</width>
+     <height>606</height>
+    </size>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="label_sent">
-        <property name="text">
-         <string><html><head/><body><p align="center"><span style=" font-size:12pt; font-weight:600; color:#007bff;">Send</span></p></body></html></string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QListWidget" name="listWidget_sentMessages"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="minimumSize">
+       <size>
+        <width>1065</width>
+        <height>584</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1065</width>
+        <height>590</height>
+       </size>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <property name="maximumSize">
+        <size>
+         <width>1059</width>
+         <height>522</height>
+        </size>
+       </property>
+       <attribute name="title">
+        <string>public</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="label_message">
-          <property name="text">
-           <string>Message:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_message"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_encrypt">
-          <property name="text">
-           <string><html><head/><body><p><span style=" font-size:12pt; font-weight:600; color:#007bff;">Encrypt :</span></p></body></html></string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboBox_encryptMethod">
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <property name="text">
-            <string>RSA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Vigenère</string>
-           </property>
+           <widget class="QLabel" name="label_sent">
+            <property name="text">
+             <string>Sent</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <property name="text">
-            <string>Shift</string>
-           </property>
+           <widget class="QListWidget" name="listWidget_sentMessages"/>
           </item>
           <item>
-           <property name="text">
-            <string>Diffie-Hellman</string>
-           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_message">
+              <property name="text">
+               <string>Message:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_message"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_encrypt">
+              <property name="text">
+               <string>Encrypt :</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_encryptMethod">
+              <item>
+               <property name="text">
+                <string>RSA</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Vigenère</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Shift</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Diffie-Hellman</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_encryptKey">
+              <property name="text">
+               <string>Encryption Key :</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_encryptKey"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_send">
+              <property name="text">
+               <string>Send</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-           <item>
-           <property name="text">
-            <string>None</string>
-           </property>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_received">
+            <property name="text">
+             <string>Received</string>
+            </property>
+           </widget>
           </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_encryptKey">
-          <property name="text">
-           <string><html><head/><body><p><span style=" font-size:12pt; font-weight:600; color:#007bff;">Encryption Key :</span></p></body></html></string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_encryptKey"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_send">
-          <property name="text">
-           <string>Send</string>
-          </property>
-         </widget>
+          <item>
+           <widget class="QListWidget" name="listWidget_receivedMessages"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_decrypt">
+              <property name="text">
+               <string>decrypt</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_decryptMethod">
+              <item>
+               <property name="text">
+                <string>RSA</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Vigenère</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Shift</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Diffie-Hellman</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_decryptKey">
+              <property name="text">
+               <string>Decryption Key</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_decryptKey"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_decrypt">
+              <property name="text">
+               <string>Decrypt</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+   <attribute name="title">
+      <string>server</string>
+   </attribute>
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+               <widget class="QComboBox" name="comboBox_encodeDecode">
+                  <item>
+                     <property name="text">
+                        <string>Encode</string>
+                     </property>
+                  </item>
+                  <item>
+                     <property name="text">
+                        <string>Decode</string>
+                     </property>
+                  </item>
+               </widget>
+            </item>
+            <item>
+               <widget class="QPushButton" name="pushButton_RSA">
+                  <property name="text">
+                     <string>RSA</string>
+                  </property>
+               </widget>
+            </item>
+            <item>
+               <widget class="QPushButton" name="pushButton_shift">
+                  <property name="text">
+                     <string>Shift</string>
+                  </property>
+               </widget>
+            </item>
+            <item>
+               <widget class="QPushButton" name="pushButton_vigenere">
+                  <property name="text">
+                     <string>Vigenère</string>
+                  </property>
+               </widget>
+            </item>
+            <item>
+               <widget class="QPushButton" name="pushButton_xor">
+                  <property name="text">
+                     <string>XOR</string>
+                  </property>
+               </widget>
+            </item>
+            <item>
+               <widget class="QPushButton" name="pushButton_diffie">
+                  <property name="text">
+                     <string>Diffie-Hellman</string>
+                  </property>
+               </widget>
+            </item>
+         </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_testServer">
-        <property name="text">
-         <string>Test Server Messages</string>
-        </property>
-       </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+               <widget class="QListWidget" name="listWidget_serverMessages"/>
+            </item>
+         </layout>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QLabel" name="label_received">
-        <property name="text">
-         <string><html><head/><body><p align="center"><span style=" font-size:12pt; font-weight:600; color:#007bff;">Receive</span></p></body></html></string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QListWidget" name="listWidget_receivedMessages"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLabel" name="label_decrypt">
-          <property name="text">
-           <string><html><head/><body><p><span style=" font-size:12pt; font-weight:600; color:#007bff;">Decrypt :</span></p></body></html></string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboBox_decryptMethod">
-          <item>
-           <property name="text">
-            <string>RSA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Vigenère</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Shift</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Diffie-Hellman</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_decryptKey">
-          <property name="text">
-           <string><html><head/><body><p><span style=" font-size:12pt; font-weight:600; color:#007bff;">Decryption Key :</span></p></body></html></string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_decryptKey"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_decrypt">
-          <property name="text">
-           <string>Decrypt</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+   </layout>
+</widget>
+
+     </widget>
     </item>
    </layout>
   </widget>

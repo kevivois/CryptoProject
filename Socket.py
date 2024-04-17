@@ -188,6 +188,12 @@ class MySocket:
         self.send_payload(payload)
         return len(payload)
 
+    def decode_shift(self, msg, amount: int):
+        arr = []
+        for p in msg:
+            arr.append(p - amount)
+        return arr
+
     def send_xor(self, msg, message_type: str, amount: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
