@@ -15,6 +15,8 @@ from math import sqrt
 
 class MySocket:
 
+    #*setup
+
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__sending = False
@@ -28,6 +30,12 @@ class MySocket:
         self.port = port
         self.sock.connect((host, port))
         self.__available = True
+
+    def reconnect(self):
+        self.__sending = False
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect(self.host,self.port)
 
     def send(self, msg, message_type):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
@@ -46,16 +54,10 @@ class MySocket:
         except Exception as e:
             print(e)
 
-
-    def reconnect(self):
-        self.__sending = False
-        self.sock.close()
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect(self.host,self.port)
-
-
     def isSending(self):
         return self.__sending
+    
+    #* static method
     
     @staticmethod
     def random(x) :
@@ -64,30 +66,7 @@ class MySocket:
         n = pow(2, 32)
         rand = (x*a + b)%n
         return rand
-
-    def randomPrime(self):
-        n = 0
     
-    def keyGenerate(self, n : int, ):
-        m = n-1
-        for x in m :
-            if self.prime(n) :
-                g = n/x
-        return g
-
-    
-    def diffieHellman(self, msg, message_type: str, a : int, key2 : int, p : int, g : int):
-        payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
-        payload += len(msg).to_bytes(2, byteorder='big')
-        key = pow(key2)
-        encoded_msg = []
-        for p in msg:
-            val = p*key
-            v = val.to_bytes(4, "big")
-            encoded_msg.append(val)
-            payload += v
-
-
     @staticmethod
     def prime( n: int):
         if n <= 1 :
@@ -104,6 +83,38 @@ class MySocket:
                 if (a % i == 0 and b % i == 0):
                     return False
         return True
+    
+#* encoding
+
+    def key_rand_prime(self, key = 0):
+        #f = open("prime.txt", "r")
+        res = 0
+        numb = self.random(key) % 669
+        for count, item in enumerate(open("prime.txt")) :
+            if(count == numb) : res = item
+            if(count > numb) : break
+        return res
+        
+    
+    
+    def diffieHellman(self, p : int):
+        q : int = int(p)-1
+        list = []
+        res = 0
+        for i in range(2, q-1) :
+            if self.prime(i) :
+                list.append(i)
+        for g in range(2, q) :
+            for j in list :
+                if g^j % int(p) != 1 :
+                    test = 0
+                else :
+                    test = 1
+                    break
+            if test == 0 :
+                res = g
+                break
+        return res
 
     def key_generate(self, p: int, q: int, e: int):
         if self.prime(p) and self.prime(q):

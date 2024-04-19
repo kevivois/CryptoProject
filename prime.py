@@ -1,17 +1,17 @@
 from math import sqrt
+def random(x) :
+        a = 1664525
+        b = 1013904223
+        n = pow(2, 32)
+        rand = (x*a + b)%n
+        return rand
+def key_rand_prime( key = 0):
+    #f = open("prime.txt", "r")
+    res = 0
+    #numb = random(key) % 669
+    for count, item in enumerate(open("prime.txt")) :
+        print(count, item)
+        if(count == 4) : res = item
+    return res
 
-def prime( n: int):
-    if n <= 1 :
-        return False
-    for i in range(2, int(sqrt(n)) + 1):
-        if (n % i == 0):
-            return False
-    return True
-
-with open('CryptoProject/prime.txt', 'w') as f:
-    for x in range(100000000000):
-        if prime(x):
-            f.write(str(x))
-            f.write('\n')
-            print(x)
-    f.close
+key_rand_prime()

@@ -1,5 +1,5 @@
 from Socket import MySocket
-
+import conversion
 def get_user_input(prompt):
     return input(prompt).strip()
 
@@ -9,29 +9,37 @@ def encode_message(b, cmd, messageType):
 def task_method(b, cmd, messageType):
     code = cmd.split(" ")[1]
     #récup des données
-    b.send(cmd, messageType)
-    msg = b.receive("s")
-    print("> " + msg)
-    key = msg.split(" ")[-1]
-    msg_to_encode = b.receive(messageType)
-    print("> " + msg_to_encode)
-    if code == "shift" : 
-        key = int(key) 
-        b.sendshift(msg_to_encode, messageType, key)
-    elif code == "vigenere" : 
-        b.send_vigenere(msg_to_encode, messageType, key)
-    elif code == "RSA" : 
-        n = msg.split("=")[1].split(",")[0]
-        e = msg.split("=")[-1]
-        b.send_better_RSA(msg_to_encode, messageType, n, e)
-    elif code == "diffiehellman" :
-        valeur =0    
-    else :
-        key = int(key)
-        b.sendxor(msg_to_encode, messageType, key)
-    print("> " + b.receive(messageType))
-    b.send_RSA(msg_to_encode, messageType, n, e)
-    print("> " + b.receive(messageType))
+    b.send(conversion.str_to_intarray(cmd), messageType)
+    if code == "DifHel" :
+        msg1 = b.receive("s")
+        print("> ",conversion.intarray_to_str(msg1))
+        p = b.key_rand_prime()
+        g = b.diffieHellman(p)
+        sent_msg = b.send(conversion.str_to_intarray(str(p) + ","+ str(g)), "s")
+        print(p , "bouh", g)
+        print(conversion.intarray_to_str(b.receive("s")))
+
+    else:
+        msg = b.receive("s")
+        print("> ",conversion.intarray_to_str(msg))
+        key = conversion.intarray_to_str(msg).split(" ")[-1]
+        msg_to_encode = b.receive(messageType)
+        print("> ",msg_to_encode)
+        if code == "shift" : 
+            key = int(key) 
+            b.sendshift(msg_to_encode, messageType, key)
+        elif code == "vigenere" : 
+            b.send_vigenere(msg_to_encode, messageType, key)
+        elif code == "RSA" : 
+            n = msg.split("=")[1].split(",")[0]
+            e = msg.split("=")[-1]
+            b.send_better_RSA(msg_to_encode, messageType, n, e)
+        else :
+            key = int(key)
+            b.sendxor(msg_to_encode, messageType, key)
+        print("> " + conversion.intarray_to_str(b.receive(messageType)))
+        b.send_RSA(msg_to_encode, messageType, n, e)
+        print("> " + b.receive(messageType))
         
 
 
