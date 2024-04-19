@@ -36,7 +36,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <property name="maximumSize">
@@ -64,14 +64,11 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QLabel" name="label_message">
-              <property name="text">
-               <string>Message:</string>
+             <widget class="QLineEdit" name="lineEdit_message">
+              <property name="placeholderText">
+               <string>message</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEdit_message"/>
             </item>
             <item>
              <widget class="QLabel" name="label_encrypt">
@@ -110,14 +107,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_encryptKey">
-              <property name="text">
-               <string>Encryption Key :</string>
+             <widget class="QLineEdit" name="lineEdit_encryptKey">
+              <property name="placeholderText">
+               <string>Encryption key</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEdit_encryptKey"/>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_send">
@@ -176,14 +170,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_decryptKey">
-              <property name="text">
-               <string>Decryption Key</string>
+             <widget class="QLineEdit" name="lineEdit_decryptKey">
+              <property name="placeholderText">
+               <string>Decryption key</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEdit_decryptKey"/>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_decrypt">
@@ -199,73 +190,72 @@
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
-   <attribute name="title">
-      <string>server</string>
-   </attribute>
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
+       <attribute name="title">
+        <string>server</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QComboBox" name="comboBox_encodeDecode">
             <item>
-               <widget class="QComboBox" name="comboBox_encodeDecode">
-                  <item>
-                     <property name="text">
-                        <string>Encode</string>
-                     </property>
-                  </item>
-                  <item>
-                     <property name="text">
-                        <string>Decode</string>
-                     </property>
-                  </item>
-               </widget>
+             <property name="text">
+              <string>Encode</string>
+             </property>
             </item>
             <item>
-               <widget class="QPushButton" name="pushButton_RSA">
-                  <property name="text">
-                     <string>RSA</string>
-                  </property>
-               </widget>
+             <property name="text">
+              <string>Decode</string>
+             </property>
             </item>
-            <item>
-               <widget class="QPushButton" name="pushButton_shift">
-                  <property name="text">
-                     <string>Shift</string>
-                  </property>
-               </widget>
-            </item>
-            <item>
-               <widget class="QPushButton" name="pushButton_vigenere">
-                  <property name="text">
-                     <string>Vigenère</string>
-                  </property>
-               </widget>
-            </item>
-            <item>
-               <widget class="QPushButton" name="pushButton_xor">
-                  <property name="text">
-                     <string>XOR</string>
-                  </property>
-               </widget>
-            </item>
-            <item>
-               <widget class="QPushButton" name="pushButton_diffie">
-                  <property name="text">
-                     <string>Diffie-Hellman</string>
-                  </property>
-               </widget>
-            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_OperationValue">
+            <property name="placeholderText">
+             <string>key</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_RSA">
+            <property name="text">
+             <string>RSA</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_shift">
+            <property name="text">
+             <string>Shift</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_vigenere">
+            <property name="text">
+             <string>Vigenère</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_diffie">
+            <property name="text">
+             <string>Diffie-Hellman</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-      </item>
-      <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-            <item>
-               <widget class="QListWidget" name="listWidget_serverMessages"/>
-            </item>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QListWidget" name="listWidget_serverMessages"/>
+          </item>
          </layout>
-      </item>
-   </layout>
-</widget>
-
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
