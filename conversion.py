@@ -10,7 +10,6 @@ def intarray_to_str(arr) -> str:
             pass
     return msg
 
-
 def int_to_str(int_value) -> str:
     return int_value.to_bytes(math.ceil(int_value.bit_length() / 8), 'big').decode('utf-8')
 

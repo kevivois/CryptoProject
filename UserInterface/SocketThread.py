@@ -1,29 +1,31 @@
-import datetime
-import threading
-from datetime import time
 from typing import Callable
+
+from PyQt5 import QtCore
+
 from Socket import MySocket
 
 
-class SocketThread(threading.Thread):
+class SocketThread(QtCore.QThread):
     def __init__(self, address, port):
+        super().__init__()
         self.address = address
         self.port = port
         self.socket = MySocket()
-        threading.Thread.__init__(self)
-        self.working = True
+        self.__working = True
         self.received_message_callback = Callable[[str], None]
+        self.adminMessages = []
 
     def run(self):
-        print("Socket Thread Started")
         self.socket.connect(self.address, self.port)
-        while self.working:
-            message = self.socket.receive('t')
+        while self.__working:
+            type, message = self.socket.receive_all()
             if message:
-                self.received_message_callback(message)
+                if type == 't':
+                    self.received_message_callback(self.socket.get_last_public_message())
 
     def set_received_message_callback(self, callback):
         self.received_message_callback = callback
 
     def stop(self):
-        self.working = False
+        self.__working = False
+        self.socket.stop()
