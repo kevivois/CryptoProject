@@ -75,9 +75,9 @@ class UI(QMainWindow):
 
     def start_rsa_test(self):
         if self.qTestServerMode.currentText() == "Encode":
-            Thread(target=self.__start_rsa_test).start()
+            Thread(target=self.__start_rsa_encode_test).start()
         elif self.qTestServerMode.currentText() == "Decode":
-            pass
+            Thread(target=self.__start_rsa_decode_test).start()
 
     def on_select_rsa(self):
         self.setEnabled(False)
@@ -89,12 +89,26 @@ class UI(QMainWindow):
         self.socketThread.socket.current_rsa_key_decode_pair = (n, d)
         self.setEnabled(True)
 
-    def __start_rsa_test(self):
+    def __start_rsa_encode_test(self):
         try:
             if self.__testing:
                 return
             self.__testing = True
             messages = self.socketThread.socket.start_rsa_encode_test(int(self.qLineEditServerKey.text()))
+            self.qServerMessages.clear()
+            for message in messages:
+                self.qServerMessages.addItem(message)
+            self.__testing = False
+        except Exception as e:
+            self.__testing = False
+            print(e)
+
+    def __start_rsa_decode_test(self):
+        try:
+            if self.__testing:
+                return
+            self.__testing = True
+            messages = self.socketThread.socket.start_rsa_decode_test(int(self.qLineEditServerKey.text()))
             self.qServerMessages.clear()
             for message in messages:
                 self.qServerMessages.addItem(message)

@@ -18,10 +18,11 @@ class SocketThread(QtCore.QThread):
     def run(self):
         self.socket.connect(self.address, self.port)
         while self.__working:
-            type, message = self.socket.receive_all()
-            if message:
-                if type == 't':
-                    self.received_message_callback(self.socket.get_last_public_message())
+            if self.socket.is_ready():
+                type, message = self.socket.receive_all()
+                if message:
+                    if type == 't':
+                        self.received_message_callback(self.socket.get_last_public_message())
 
     def set_received_message_callback(self, callback):
         self.received_message_callback = callback
