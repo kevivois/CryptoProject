@@ -91,7 +91,7 @@ class MySocket:
     def is_prime(n: int):
         if n <= 1:
             return False
-        for i in range(2, int(sqrt(n)) + 1):
+        for i in range(2, int(math.sqrt(n)) + 1):
             if n % i == 0:
                 return False
         return True
@@ -215,9 +215,6 @@ class MySocket:
         for p in msg:
             payload += (p + amount).to_bytes(4, "big")
             message.append(p + amount)
-
-        found_shift = self.shift_analysis(message)
-        print("found shift ="+str(found_shift),"intial shift value ="+str(amount))
         self.send_payload(payload)
         return message
 
@@ -233,12 +230,10 @@ class MySocket:
         for i in range(1, 10000):
             msg = self.decode_shift(encoded_msg, i)
             words = conversion.intarray_to_str(msg).split(" ")
-            print(words)
             count = 0
             for w in words:
                 if w in self.dictionnary:
                     count += 1
-            print(count / len(words))
             if count / len(words) > ratio:
                 ratio = count / len(words)
                 shifted = i
@@ -271,6 +266,21 @@ class MySocket:
         result_message: Message = self.get_last_private_message()
         return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
                 msg_to_encode.toString(), Message("t", msg_encoded, False).toString(), result_message.toString()]
+
+    def start_shift_decode_test(self, value: int):
+        self.remove_all_admin_messages()
+        cmd_text = "task shift decode " + str(value if value <= 10000 else 10000)
+        self.send(conversion.str_to_intarray(cmd_text), "s")
+        msg: Message = self.get_last_private_message()
+        encoded_msg:Message = self.get_last_private_message()
+        print(encoded_msg.get_string_message())
+        key = self.shift_analysis(encoded_msg.get_int_message())
+        print(key)
+        self.send(conversion.str_to_intarray(str(key)),"s")
+        result_message:Message = self.get_last_private_message()
+        print(result_message.get_string_message())
+        return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), encoded_msg.toString(),
+                Message("s",conversion.str_to_intarray(str(key))).toString(), result_message.toString()]
 
     def start_rsa_encode_test(self, value: int):
         self.remove_all_admin_messages()

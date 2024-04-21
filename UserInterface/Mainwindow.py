@@ -119,11 +119,11 @@ class UI(QMainWindow):
 
     def start_shift_test(self):
         if self.qTestServerMode.currentText() == "Encode":
-            Thread(target=self.__start_shift_test).start()
+            Thread(target=self.__start_shift_encode_test).start()
         elif self.qTestServerMode.currentText() == "Decode":
-            pass
+            Thread(target=self.__start_shift_decode_test).start()
 
-    def __start_shift_test(self):
+    def __start_shift_encode_test(self):
         try:
             if self.__testing:
                 return
@@ -136,6 +136,19 @@ class UI(QMainWindow):
         except Exception as e:
             self.__testing = False
             print(e)
+
+    def __start_shift_decode_test(self):
+        try:
+            if self.__testing:
+                return
+            self.__testing = True
+            messages = self.socketThread.socket.start_shift_decode_test(int(self.qLineEditServerKey.text()))
+            self.qServerMessages.clear()
+            for message in messages:
+                self.qServerMessages.addItem(message)
+            self.__testing = False
+        except Exception as e:
+            self.__testing = False
 
     def __start_vigenere_test(self):
         try:
