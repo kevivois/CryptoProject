@@ -28,7 +28,6 @@ class Application(QApplication):
     def handle_error(self, cls, exception, traceback):
         sys.__excepthook__(cls, exception, traceback)
 
-
 if __name__ == "__main__":
     application = Application(sys.argv)
     timer = QTimer()

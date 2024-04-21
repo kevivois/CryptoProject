@@ -2,6 +2,7 @@ import array
 import base64
 import codecs
 import math
+import random
 import socket
 import struct
 from collections import defaultdict, Counter
@@ -12,9 +13,24 @@ from UserInterface.Message import Message
 from math import sqrt
 
 
+class RandomGenerator:
+    current_value: int
+
+    def __init__(self, seed: int = 0) -> None:
+        self.current_value = seed
+
+    def random(self):
+        a = 1664525
+        b = 1013904223
+        n = 1 << 32
+        rand = (self.current_value * a + b) % n
+        self.current_value = rand
+        return rand
+
+
 class MySocket:
 
-    #*setup
+    # *setup
 
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,6 +41,9 @@ class MySocket:
         self.__available = False
         self.__abortingReceived = False
         self.messages = []
+        self.random_generator = RandomGenerator(314)
+        self.current_rsa_key_encode_pair = (None, None)
+        self.current_rsa_key_decode_pair = (None, None)
 
     def connect(self, host, port):
         self.host = host
@@ -39,7 +58,6 @@ class MySocket:
         self.__abortingReceived = True
 
     def send(self, msg, message_type):
-        print("sent " + conversion.intarray_to_str(msg))
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         for p in msg:
@@ -68,93 +86,83 @@ class MySocket:
 
     def isSending(self):
         return self.__sending
-    
-    #* static method
-    
+
     @staticmethod
-    def random(x):
-        a = 1664525
-        b = 1013904223
-        n = pow(2, 32)
-        rand = (x * a + b) % n
-        return rand
-    
-    @staticmethod
-    def prime(n: int):
+    def is_prime(n: int):
         if n <= 1:
             return False
         for i in range(2, int(sqrt(n)) + 1):
-            if (n % i == 0):
+            if n % i == 0:
                 return False
         return True
 
     @staticmethod
     def coprime(a: int, b: int):
-        if (a < b):
-            for i in range(2, a):
-                if (a % i == 0 and b % i == 0):
-                    return False
+        mn = min(a, b)
+        for i in range(2, mn):
+            if a % i == 0 and b % i == 0:
+                return False
         return True
-    
-#* encoding
 
-    def key_rand_prime(self, key = 0):
-        #f = open("prime.txt", "r")
+    def key_rand_prime(self):
         res = 0
-        numb = self.random(key) % 669
-        for count, item in enumerate(open("prime.txt")) :
-            if(count == numb) : res = item
-            if(count > numb) : break
+        numb = self.random_generator.random() % 669  # to change (random always the same ? )
+        with open("prime.txt") as pf:
+            res = int(pf.read().splitlines()[numb])
         return res
-        
-    
-    
-    def diffieHellman(self, p : int):
-        q : int = int(p)-1
-        list = []
-        res = 0
-        for i in range(2, q-1) :
-            if self.prime(i) :
-                list.append(i)
-        for g in range(2, q) :
-            for j in list :
-                if g^j % int(p) != 1 :
-                    test = 0
-                else :
-                    test = 1
+
+
+    def diffieHellman(self, p: int):
+        q: int = int(p) - 1
+        liste = []
+        for i in range(2, q - 1):
+            if self.is_prime(i):
+                liste.append(i)
+        for g in range(2, int(q)):
+            is_generator = True
+            for j in liste:
+                if pow(g, q // j, int(p)) == 1:
+                    is_generator = False
                     break
-            if test == 0 :
-                res = g
-                break
-        return res
+            if is_generator:
+                return g
+        raise ValueError("diffieHellman didnt returned generator value")
 
-    def key_generate(self, p: int, q: int, e: int):
-        if self.prime(p) and self.prime(q):
+    def generate_rsa_p_q(self):
+        p: int = self.key_rand_prime()
+        q: int = self.key_rand_prime()
+        while not (self.is_prime(q) and self.is_prime(p) and p != q):
+            p: int = self.key_rand_prime()
+            q: int = self.key_rand_prime()
+        return p, q
+
+    def generate_rsa_keypair(self, p: int, q: int):
+        def modular_inverse(a, b):
+            """Calcule l'inverse multiplicatif de e modulo phi"""
+            def extended_gcd(a, b):
+                if a == 0:
+                    return b, 0, 1
+                else:
+                    g, x, y = extended_gcd(b % a, a)
+                    return g, y - (b // a) * x, x
+
+            g, x, _ = extended_gcd(a, b)
+            if g == 1:
+                return x % b
+            else:
+                raise ValueError("L'inverse multiplicatif n'existe pas.")
+        if self.is_prime(p) and self.is_prime(q) or p == q:
             n = q * p
             k = (p - 1) * (q - 1)
-
-            if e < k and self.coprime(e, k):
-                d = 0
-                b = 1
-                res = 0
-                while res != 1:
-                    res = d * e + b * k
-                    b += 1
-                return [n, e, d]
+            while True:
+                e = random.randint(2, k)
+                is_co_prime = self.coprime(e, k)
+                if e < k and is_co_prime:
+                    break
+            d = modular_inverse(e,k) #aaa1
+            return e, d, n
         else:
-            return False
-
-    def send_RSA(self, msg, message_type: str, n: int, e: int):
-        payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
-        payload += len(msg).to_bytes(2, byteorder='big')
-        encoded_msg = []
-        for p in msg:
-            val = pow(p, int(e)) % int(n)
-            v = val.to_bytes(4, "big")
-            encoded_msg.append(val)
-            payload += v
-        self.send_payload(payload)
-        return encoded_msg
+            raise ValueError("p et q ne doivent pas être premiers et ne doivent pas être égaux")
 
     def modular_pow(self, b, e, m):
         r = 1
@@ -166,7 +174,7 @@ class MySocket:
             if e & 1: r = (r * b) % m
         return r
 
-    def send_better_RSA(self, msg, message_type: str, n: int, e: int):
+    def send_RSA(self, msg, message_type: str, n: int, e: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
         payload += len(msg).to_bytes(2, byteorder='big')
         msg_array = []
@@ -174,15 +182,14 @@ class MySocket:
             valeur = self.modular_pow(p, e, n)
             msg_array.append(valeur)
             payload += valeur.to_bytes(4, "big")
-        print(":", payload, ":")
         self.send_payload(payload)
         return msg_array
 
     def decode_RSA(self, msg, n: int, d: int):
         decoded_array = []
-        for idx, value in enumerate(msg):
-            # TODO
-            pass
+        for c in msg:
+            valeur = self.modular_pow(c, d, n)
+            decoded_array.append(valeur)
         return decoded_array
 
     def send_vigenere(self, msg, message_type: str, key: str):
@@ -249,13 +256,13 @@ class MySocket:
 
     def start_rsa_encode_test(self, value: int):
         self.remove_all_admin_messages()
-        cmd_text = "task RSA encode " + str(value if value <= 999 else 999)
+        cmd_text = "task RSA encode " + str(value if value <= 10000 else 10000)
         self.send(conversion.str_to_intarray(cmd_text), "s")
         msg: Message = self.get_last_private_message()
         n = msg.get_string_message().split("=")[1].split(",")[0]
         e = msg.get_string_message().split("=")[-1]
         msg_to_encode: Message = self.get_last_private_message()
-        msg_encoded = self.send_better_RSA(msg_to_encode.get_int_message(), "s", int(n), int(e))
+        msg_encoded = self.send_RSA(msg_to_encode.get_int_message(), "s", int(n), int(e))
         result_message: Message = self.get_last_private_message()
         return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
                 msg_to_encode.toString(), Message("t", msg_encoded, False).toString(), result_message.toString()]
@@ -272,6 +279,31 @@ class MySocket:
 
         return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
                 msg_to_encode.toString(), Message("t", msg_encoded, False).toString(), result_message.toString()]
+
+    def start_diffie_encode_test(self):
+        self.remove_all_admin_messages()
+        cmd_text = "task DifHel"
+        self.send(conversion.str_to_intarray(cmd_text), "s")
+        msg: Message = self.get_last_private_message()
+        p = self.key_rand_prime()
+        g = self.diffieHellman(p)
+        keys_data = str(p) + "," + str(g)
+        keys_data_message = Message("s", conversion.str_to_intarray(keys_data))
+        self.send(keys_data_message.get_int_message(), "s")
+        halfkey = self.random_generator.random()
+        publicKey = self.modular_pow(g, halfkey, p)
+        server_key_info: Message = self.get_last_private_message()
+        self.send(conversion.str_to_intarray(str(publicKey)), "s")
+        server_key_message: Message = self.get_last_private_message()
+        print(server_key_message.get_string_message())
+        shared_key = self.modular_pow(int(server_key_message.get_string_message()), halfkey, p)
+        self.send(conversion.str_to_intarray(str(shared_key)), "s")
+        shared_key_info = self.get_last_private_message()
+        self.send(conversion.str_to_intarray(str(shared_key)), "s")
+        result:Message = self.get_last_private_message()
+        return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
+                keys_data_message.toString(), Message("t", conversion.str_to_intarray(str(publicKey)), False).toString(),
+                server_key_message.toString(), result.toString()]
 
     def __receive_all(self):
         waiting = True
@@ -291,9 +323,7 @@ class MySocket:
             lgth = int.from_bytes(data[4:6], "big")
             content = self.sock.recv(lgth * 4)
             while len(content) < lgth * 4:
-                if lgth - len(content) < 0:
-                    break
-                content += self.sock.recv(lgth - len(content))
+                content += self.sock.recv((lgth * 4) - len(content))
             for i in range(0, lgth * 4, 4):
                 try:
                     arr.append(int.from_bytes(content[i:i + 4], "big"))
@@ -304,21 +334,28 @@ class MySocket:
             return mode, arr
         return "", []
 
-    def get_last_public_message(self):
-        for message in self.messages.copy():
-            if message.mode == "t":
-                self.messages.remove(message)
-                return message
-        return None
+    def get_last_public_message(self, block=False):
+        msg = None
+        while not msg:
+            for message in self.messages.copy():
+                if message.mode == "t":
+                    msg = message
+                    self.messages.remove(message)
+                    return msg
+            if not block:
+                break
+            return None
 
     def get_last_private_message(self, block=True):
         msg = None
-        while not msg and block:
+        while not msg:
             for message in self.messages.copy():
                 if message.mode == "s":
                     self.messages.remove(message)
                     msg = message
                     return msg
+            if not block:
+                break
         return None
 
     def remove_all_admin_messages(self):
@@ -327,7 +364,6 @@ class MySocket:
                 self.messages.remove(message)
 
     def receive(self, typeToWait='t'):
-        print("called receive with type :" + typeToWait)
         try:
             return self.__receive(typeToWait)
         except Exception as e:
@@ -352,7 +388,6 @@ class MySocket:
             lgth = int.from_bytes(data[4:6], "big")
             content = self.sock.recv(lgth * 4)
             while len(content) < (lgth * 4):
-                print(len(content), lgth * 4)
                 content += self.sock.recv(lgth - len(content))
             for i in range(0, lgth * 4, 4):
                 try:

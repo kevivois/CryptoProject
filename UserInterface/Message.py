@@ -1,7 +1,9 @@
 import typing
 import conversion
+
+
 class Message():
-    def __init__(self,mode,arr:typing.List[int],received=False):
+    def __init__(self, mode, arr: typing.List[int], received=False):
         self.arr = arr
         self.mode = mode
         self.received = received
@@ -11,6 +13,7 @@ class Message():
 
     def get_int_message(self):
         return self.arr
+
     def get_mode(self):
         return self.mode
 
