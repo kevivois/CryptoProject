@@ -10,7 +10,6 @@ from typing import List
 
 import conversion
 from UserInterface.Message import Message
-from math import sqrt
 
 
 class RandomGenerator:
@@ -35,7 +34,7 @@ class MySocket:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setblocking(True)
-        self.__sending = False
+        self.__ready = False
         self.host = None
         self.port = None
         self.__available = False
@@ -44,12 +43,13 @@ class MySocket:
         self.random_generator = RandomGenerator(314)
         self.current_rsa_key_encode_pair = (None, None)
         self.current_rsa_key_decode_pair = (None, None)
+        self.dictionnary = [line.replace("\n","") for line in open("french-words.txt","r").readlines()]
 
     def connect(self, host, port):
         self.host = host
         self.port = port
         self.sock.connect((host, port))
-        self.__available = True
+        self.__ready = True
 
     def stop(self):
         self.sock.close()
@@ -75,7 +75,7 @@ class MySocket:
             print(e)
 
     def reconnect(self):
-        self.__sending = False
+        self.__ready = False
         self.abort_actual_receiving()
         try:
             self.sock.close()
@@ -84,8 +84,8 @@ class MySocket:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect(self.host, self.port)
 
-    def isSending(self):
-        return self.__sending
+    def is_ready(self):
+        return self.__ready
 
     @staticmethod
     def is_prime(n: int):
@@ -137,8 +137,6 @@ class MySocket:
 
     def generate_rsa_keypair(self, p: int, q: int):
         def modular_inverse(a, b):
-            """Calcule l'inverse multiplicatif de e modulo phi"""
-
             def extended_gcd(a, b):
                 if a == 0:
                     return b, 0, 1
@@ -159,8 +157,8 @@ class MySocket:
                 e = self.random_generator.random()
                 if e < k and self.coprime(e, k):
                     break
-            d = modular_inverse(e, k)  # aaa1
-            return n,e,d
+            d = modular_inverse(e, k)
+            return n, e, d
         else:
             raise ValueError("p et q ne doivent pas être premiers et ne doivent pas être égaux")
 
@@ -217,6 +215,9 @@ class MySocket:
         for p in msg:
             payload += (p + amount).to_bytes(4, "big")
             message.append(p + amount)
+
+        found_shift = self.shift_analysis(message)
+        print("found shift ="+str(found_shift),"intial shift value ="+str(amount))
         self.send_payload(payload)
         return message
 
@@ -225,6 +226,23 @@ class MySocket:
         for p in msg:
             arr.append(p - amount)
         return arr
+
+    def shift_analysis(self, encoded_msg: List[int]):
+        ratio = 0
+        shifted = -1
+        for i in range(1, 10000):
+            msg = self.decode_shift(encoded_msg, i)
+            words = conversion.intarray_to_str(msg).split(" ")
+            print(words)
+            count = 0
+            for w in words:
+                if w in self.dictionnary:
+                    count += 1
+            print(count / len(words))
+            if count / len(words) > ratio:
+                ratio = count / len(words)
+                shifted = i
+        return shifted
 
     def send_xor(self, msg, message_type: str, amount: int):
         payload = bytes("ISC", 'utf-8') + bytes(message_type, 'utf-8')
@@ -266,6 +284,22 @@ class MySocket:
         result_message: Message = self.get_last_private_message()
         return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
                 msg_to_encode.toString(), Message("t", msg_encoded, False).toString(), result_message.toString()]
+
+    def start_rsa_decode_test(self, value: int):
+        self.remove_all_admin_messages()
+        cmd_text = "task RSA decode " + str(value if value <= 10000 else 10000)
+        self.send(conversion.str_to_intarray(cmd_text), "s")
+        msg: Message = self.get_last_private_message()
+        p, q = self.generate_rsa_p_q()
+        n, e, d = self.generate_rsa_keypair(p, q)
+        self.send(conversion.str_to_intarray(str(n) + "," + str(e)), "s")
+        encoded_msg: Message = self.get_last_private_message()
+        real_message_data = self.decode_RSA(encoded_msg.get_int_message(), n, d)
+        real_message: Message = Message("s", real_message_data, )
+        self.send(real_message_data, "s")
+        result_message: Message = self.get_last_private_message()
+        return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
+                encoded_msg.toString(), real_message.toString(), result_message.toString()]
 
     def start_vigenere_encode_test(self, value: int):
         self.remove_all_admin_messages()
