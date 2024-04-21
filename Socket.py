@@ -111,7 +111,6 @@ class MySocket:
             res = int(pf.read().splitlines()[numb])
         return res
 
-
     def diffieHellman(self, p: int):
         q: int = int(p) - 1
         liste = []
@@ -139,6 +138,7 @@ class MySocket:
     def generate_rsa_keypair(self, p: int, q: int):
         def modular_inverse(a, b):
             """Calcule l'inverse multiplicatif de e modulo phi"""
+
             def extended_gcd(a, b):
                 if a == 0:
                     return b, 0, 1
@@ -151,16 +151,16 @@ class MySocket:
                 return x % b
             else:
                 raise ValueError("L'inverse multiplicatif n'existe pas.")
+
         if self.is_prime(p) and self.is_prime(q) or p == q:
             n = q * p
             k = (p - 1) * (q - 1)
             while True:
-                e = random.randint(2, k)
-                is_co_prime = self.coprime(e, k)
-                if e < k and is_co_prime:
+                e = self.random_generator.random()
+                if e < k and self.coprime(e, k):
                     break
-            d = modular_inverse(e,k) #aaa1
-            return e, d, n
+            d = modular_inverse(e, k)  # aaa1
+            return n,e,d
         else:
             raise ValueError("p et q ne doivent pas être premiers et ne doivent pas être égaux")
 
@@ -300,9 +300,10 @@ class MySocket:
         self.send(conversion.str_to_intarray(str(shared_key)), "s")
         shared_key_info = self.get_last_private_message()
         self.send(conversion.str_to_intarray(str(shared_key)), "s")
-        result:Message = self.get_last_private_message()
+        result: Message = self.get_last_private_message()
         return [Message("s", conversion.str_to_intarray(cmd_text), False).toString(), msg.toString(),
-                keys_data_message.toString(), Message("t", conversion.str_to_intarray(str(publicKey)), False).toString(),
+                keys_data_message.toString(),
+                Message("t", conversion.str_to_intarray(str(publicKey)), False).toString(),
                 server_key_message.toString(), result.toString()]
 
     def __receive_all(self):
